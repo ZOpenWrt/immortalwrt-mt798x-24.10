@@ -1,0 +1,200 @@
+/dts-v1/;
+#include "mt7981.dtsi"
+/ {
+	model = "Philips-HY3000";
+	compatible = "philips,hy3000";
+	chosen {
+		bootargs = "console=ttyS0,115200n1 loglevel=8  \
+				earlycon=uart8250,mmio32,0x11002000 \
+				root=PARTLABEL=rootfs rootfstype=squashfs,f2fs";
+	};
+
+	memory {
+		// fpga ddr2: 128MB*2
+		reg = <0 0x40000000 0 0x10000000>;
+	};
+
+    aliases {
+		led-boot = &red_led;
+		led-failsafe = &red_led;
+		led-running = &green_led;
+	};
+	reg_3p3v: regulator-3p3v {
+		compatible = "regulator-fixed";
+		regulator-name = "fixed-3.3V";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		button-reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_HIGH>;
+		};
+
+		button-wps {
+			label = "wps";
+			linux,code = <KEY_WPS_BUTTON>;
+			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
+		};
+	};
+	leds {
+		compatible = "gpio-leds";
+
+		red_led: red {
+			label = "hy3000:red";
+			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
+		};
+
+		green_led: green {
+			label = "hy3000:green";
+			gpios = <&pio 13 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
+    
+&uart0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&mmc0 {
+         pinctrl-names = "default", "state_uhs";
+         pinctrl-0 = <&mmc0_pins_default>;
+         pinctrl-1 = <&mmc0_pins_uhs>;
+         bus-width = <8>;
+         max-frequency = <52000000>;
+         cap-mmc-highspeed;
+         vmmc-supply = <&reg_3p3v>;
+         non-removable;
+         status = "okay";
+};
+
+&eth {
+	status = "okay";
+
+	gmac0: mac@0 {
+		compatible = "mediatek,eth-mac";
+		reg = <0>;
+		phy-mode = "gmii";
+
+		fixed-link {
+			speed = <2500>;
+			full-duplex;
+			pause;
+		};
+	};
+	
+	gmac1: mac@1 {
+		compatible = "mediatek,eth-mac";
+		reg = <1>;
+		phy-mode = "gmii";
+
+		fixed-link {
+			speed = <2500>;
+			full-duplex;
+			pause;
+		};
+	};
+
+
+	mdio: mdio-bus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		switch@0 {
+			compatible = "mediatek,mt7531";
+			reg = <31>;
+			reset-gpios = <&pio 39 0>;
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+					label = "wan";
+				};
+
+				port@1 {
+					reg = <1>;
+					label = "lan1";
+				};
+
+				port@2 {
+					reg = <2>;
+					label = "lan2";
+				};
+
+				port@3 {
+					reg = <3>;
+					label = "lan3";
+				};
+				
+				port@6 {
+					reg = <6>;
+					label = "cpu";
+					ethernet = <&gmac0>;
+					phy-mode = "2500base-x";
+
+					fixed-link {
+						speed = <2500>;
+						full-duplex;
+						pause;
+					};
+				};
+			};
+		};
+	};
+};
+
+&hnat {
+	mtketh-wan = "eth1";
+	mtketh-lan = "lan";
+	mtketh-ppd = "eth1";
+	mtketh-max-gmac = <2>;
+	status = "okay";
+};
+&spi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spic_pins>;
+	status = "disabled";
+};
+
+&pio {
+
+	spic_pins: spi1-pins {
+		mux {
+			function = "spi";
+			groups = "spi1_1";
+		};
+	};
+
+	mmc0_pins_default: mmc0-pins-default {
+		mux {
+			function = "flash";
+			groups = "emmc_45";
+		};
+	};
+
+	mmc0_pins_uhs: mmc0-pins-uhs {
+		mux {
+			function = "flash";
+			groups = "emmc_45";
+		};
+	};
+};
+
+&xhci {
+	mediatek,u3p-dis-msk = <0x0>;
+	phys = <&u2port0 PHY_TYPE_USB2>,
+	       <&u3port0 PHY_TYPE_USB3>;
+	status = "okay";
+};

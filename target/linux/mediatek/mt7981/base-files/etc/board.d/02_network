@@ -68,6 +68,9 @@ mediatek_setup_interfaces()
 	*rax3000m*)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "eth1"
 		;;
+        *honor,fur-602*)
+                ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" wan
+                ;;
 	*nokia,ea0326gmp*)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" wan
 		;;
@@ -93,6 +96,12 @@ mediatek_setup_interfaces()
 	*)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" eth1
 		;;
+         *philips,hy3000*)
+               ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" wan
+	        ;;
+         *honor,fur-602*)
+               ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "eth1"
+                ;;
 	esac
 }
 

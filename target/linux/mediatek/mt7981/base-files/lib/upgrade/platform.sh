@@ -212,6 +212,7 @@ platform_do_upgrade() {
 	cmcc,a10 |\
 	cmcc,rax3000m |\
 	h3c,nx30pro |\
+    *honor,fur-602* |\
 	*konka,komi-a31* |\
 	*nokia,ea0326gmp* |\
 	*snand*)
@@ -223,6 +224,7 @@ platform_do_upgrade() {
 	cmcc,xr30-emmc |\
 	*sl,3000* |\
         *sl,3000-emmc* |\
+	philips,hy3000 |\
 	*emmc*)
 		CI_KERNPART="kernel"
 		CI_ROOTPART="rootfs"
@@ -279,6 +281,7 @@ platform_check_image() {
 	*nokia,ea0326gmp* |\
 	Airpi |\
 	*snand* |\
+    philips,hy3000 |\
 	*emmc*)
 		# tar magic `ustar`
 		magic="$(dd if="$1" bs=1 skip=257 count=5 2>/dev/null)"
